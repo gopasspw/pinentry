@@ -11,8 +11,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/gopasspw/gopass/pkg/debug"
 )
 
 var (
@@ -127,7 +125,6 @@ func (c *Client) GetPin() ([]byte, error) {
 	}
 	// handle status messages
 	for bytes.HasPrefix(buf, []byte("S ")) {
-		debug.Log("message: %q", string(buf))
 		buf, _, err = c.out.ReadLine()
 		if err != nil {
 			return nil, err

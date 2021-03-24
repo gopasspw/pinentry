@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/gopasspw/gopass/pkg/debug"
 )
 
 // Path returns the path to a GPG component
@@ -17,7 +15,6 @@ func Path(key string) (string, error) {
 	cmd.Stdout = buf
 	cmd.Stderr = os.Stderr
 
-	debug.Log("%s %+v", cmd.Path, cmd.Args)
 	if err := cmd.Run(); err != nil {
 		return "", err
 	}
@@ -34,6 +31,5 @@ func Path(key string) (string, error) {
 		}
 	}
 
-	debug.Log("key %q not found", key)
 	return "", nil
 }
