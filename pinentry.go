@@ -30,11 +30,13 @@ type Client struct {
 	cmd *exec.Cmd
 	in  io.WriteCloser
 	out *bufio.Reader
+	bin string
 }
 
 // New creates a new pinentry client
 func New() (*Client, error) {
-	cmd := exec.Command(GetBinary())
+	bin := GetBinary()
+	cmd := exec.Command(bin)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, err
@@ -56,13 +58,14 @@ func New() (*Client, error) {
 		return nil, err
 	}
 	if !bytes.HasPrefix(banner, []byte("OK")) {
-		return nil, fmt.Errorf("wrong banner: %s", banner)
+		return nil, fmt.Errorf("wrong banner from %s: %q", bin, banner)
 	}
 
 	cl := &Client{
 		cmd: cmd,
 		in:  stdin,
 		out: br,
+		bin: bin,
 	}
 
 	return cl, nil
@@ -93,7 +96,7 @@ func (c *Client) Set(key, value string) error {
 	}
 	line, _, _ := c.out.ReadLine()
 	if string(line) != "OK" {
-		return fmt.Errorf("error: %s", line)
+		return fmt.Errorf("error from %s: %q", c.bin, line)
 	}
 	return nil
 }
@@ -106,7 +109,7 @@ func (c *Client) Option(value string) error {
 	}
 	line, _, _ := c.out.ReadLine()
 	if string(line) != "OK" {
-		return fmt.Errorf("error: %s", line)
+		return fmt.Errorf("error from %s: %q", c.bin, line)
 	}
 	return nil
 }
@@ -132,7 +135,7 @@ func (c *Client) GetPin() ([]byte, error) {
 	}
 	// now there should be some data
 	if !bytes.HasPrefix(buf, []byte("D ")) {
-		return nil, fmt.Errorf("unexpected response: %s", buf)
+		return nil, fmt.Errorf("unexpected response from %s: %s", c.bin, buf)
 	}
 
 	pin := make([]byte, len(buf))
@@ -145,7 +148,7 @@ func (c *Client) GetPin() ([]byte, error) {
 		return nil, err
 	}
 	if !bytes.HasPrefix(ok, []byte("OK")) {
-		return nil, fmt.Errorf("unexpected response: %s", ok)
+		return nil, fmt.Errorf("unexpected response from %s: %s", c.bin, ok)
 	}
 	pin = pin[2:]
 
