@@ -1,3 +1,3 @@
-module github.com/gador/pinentry
+module github.com/gopasspw/pinentry
 
 go 1.16
